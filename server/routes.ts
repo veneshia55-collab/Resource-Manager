@@ -327,6 +327,109 @@ ${contentUrl ? `URL: "${contentUrl}"` : ""}
     }
   });
 
+  app.post("/api/libu/extract-url", async (req: Request, res: Response) => {
+    try {
+      const { url, contentType } = req.body;
+
+      if (!url) {
+        return res.status(400).json({ error: "URL이 필요합니다." });
+      }
+
+      let videoTitle = "";
+      let videoDescription = "";
+      let extractedText = "";
+
+      // YouTube URL 처리
+      const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/)([^&\s]+)/);
+      
+      if (youtubeMatch) {
+        const videoId = youtubeMatch[1];
+        
+        try {
+          // oEmbed API로 기본 정보 가져오기
+          const oembedResponse = await fetch(
+            `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`
+          );
+          
+          if (oembedResponse.ok) {
+            const oembedData = await oembedResponse.json();
+            videoTitle = oembedData.title || "";
+          }
+        } catch (e) {
+          console.log("oEmbed fetch failed:", e);
+        }
+
+        // AI를 사용하여 콘텐츠 분석 요청
+        const prompt = `유튜브 영상 URL: ${url}
+영상 제목: ${videoTitle || "제목 없음"}
+콘텐츠 유형: ${contentType === "youtube" ? "유튜브 영상" : contentType === "shortform" ? "숏폼 영상" : "광고 영상"}
+
+이 영상의 URL과 제목을 바탕으로, 이 영상이 어떤 내용일 것 같은지 추측하여 분석 가능한 콘텐츠 텍스트를 생성해주세요.
+
+다음 JSON 형식으로 응답하세요:
+{
+  "title": "영상 제목 (없으면 추측)",
+  "extractedText": "영상 내용 설명 및 분석 가능한 텍스트 (최소 200자 이상)",
+  "summary": "영상의 주요 내용 요약 (1-2문장)"
+}`;
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4.1-mini",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: prompt },
+          ],
+          response_format: { type: "json_object" },
+          max_completion_tokens: 1000,
+        });
+
+        const result = JSON.parse(completion.choices[0]?.message?.content || "{}");
+        
+        return res.json({
+          success: true,
+          title: result.title || videoTitle || "유튜브 영상",
+          text: result.extractedText || result.summary || "",
+          source: "youtube",
+        });
+      }
+
+      // 일반 URL 처리 (광고 등)
+      const prompt = `URL: ${url}
+콘텐츠 유형: ${contentType === "ad" ? "광고" : "웹 콘텐츠"}
+
+이 URL에서 어떤 콘텐츠가 있을 것 같은지 URL 패턴과 도메인을 바탕으로 추측하여 분석 가능한 텍스트를 생성해주세요.
+
+다음 JSON 형식으로 응답하세요:
+{
+  "title": "콘텐츠 제목 (추측)",
+  "extractedText": "콘텐츠 내용 설명 (최소 100자 이상)",
+  "summary": "주요 내용 요약"
+}`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4.1-mini",
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: prompt },
+        ],
+        response_format: { type: "json_object" },
+        max_completion_tokens: 1000,
+      });
+
+      const result = JSON.parse(completion.choices[0]?.message?.content || "{}");
+      
+      res.json({
+        success: true,
+        title: result.title || "웹 콘텐츠",
+        text: result.extractedText || result.summary || "",
+        source: "url",
+      });
+    } catch (error) {
+      console.error("URL extraction error:", error);
+      res.status(500).json({ error: "URL에서 콘텐츠를 추출하는 중 오류가 발생했습니다." });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
