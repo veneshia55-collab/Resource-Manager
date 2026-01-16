@@ -47,7 +47,7 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
   return (
     <Animated.View style={[styles.container, containerStyle]}>
       <LinearGradient
-        colors={[Colors.primary, "#6B7BF7", Colors.primaryLight]}
+        colors={[Colors.primary, "#7DD8BE", Colors.primaryLight]}
         style={styles.gradient}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
