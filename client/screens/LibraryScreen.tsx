@@ -119,7 +119,11 @@ export default function LibraryScreen() {
                 {CONTENT_TYPE_LABELS[item.content.type] || item.content.type}
               </ThemedText>
             </View>
-            <Pressable onPress={() => handleDelete(item)} hitSlop={8}>
+            <Pressable
+              onPress={() => handleDelete(item)}
+              hitSlop={8}
+              style={[styles.deleteButton, { backgroundColor: theme.error + "15" }]}
+            >
               <Feather name="trash-2" size={18} color={theme.error} />
             </Pressable>
           </View>
@@ -167,6 +171,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.xs,
+  },
+  deleteButton: {
+    padding: Spacing.sm,
+    borderRadius: BorderRadius.sm,
   },
   cardTitle: {
     marginBottom: Spacing.sm,
