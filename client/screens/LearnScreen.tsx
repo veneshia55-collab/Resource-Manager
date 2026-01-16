@@ -104,16 +104,16 @@ export default function LearnScreen() {
           },
         ]}
       >
-        <Pressable
-          style={[styles.addContentButton, { backgroundColor: Colors.primaryLight }]}
-          onPress={handleAddContent}
-        >
-          <View style={[styles.addIconCircle, { backgroundColor: Colors.primary }]}>
-            <Feather name="plus" size={32} color="#FFFFFF" />
+        <Pressable style={styles.emptyBubbleContainer} onPress={handleAddContent}>
+          <View style={styles.emptyBubble}>
+            <ThemedText type="defaultSemiBold" style={{ color: Colors.primary }}>
+              콘텐츠 추가하기
+            </ThemedText>
+            <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: 4 }}>
+              미디어 콘텐츠를 추가해서 학습을 시작하세요
+            </ThemedText>
           </View>
-          <ThemedText type="defaultSemiBold" style={{ color: Colors.primary, marginTop: Spacing.md }}>
-            콘텐츠 추가하기
-          </ThemedText>
+          <View style={styles.bubbleTail} />
         </Pressable>
       </View>
     );
@@ -152,19 +152,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  addContentButton: {
+  emptyBubbleContainer: {
     alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: Spacing["2xl"],
-    paddingHorizontal: Spacing["3xl"],
-    borderRadius: BorderRadius.lg,
   },
-  addIconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+  emptyBubble: {
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 20,
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing["2xl"],
     alignItems: "center",
-    justifyContent: "center",
+    maxWidth: "80%",
+  },
+  bubbleTail: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 12,
+    borderRightWidth: 12,
+    borderTopWidth: 16,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: Colors.primaryLight,
+    marginTop: -1,
   },
   sectionTitle: {
     marginBottom: Spacing.md,
