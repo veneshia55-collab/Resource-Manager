@@ -194,7 +194,7 @@ export default function ReportScreen() {
         ]}
       >
         <EmptyState
-          image={require("../../assets/images/illustrations/empty-content.png")}
+          image={require("../../assets/images/libu-mascot.png")}
           title="콘텐츠를 먼저 입력해주세요"
           description="학습할 콘텐츠가 있어야 리포트를 확인할 수 있어요"
         />
