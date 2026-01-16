@@ -49,12 +49,14 @@ export default function LearnScreen() {
 
   const MascotHeader = () => (
     <View style={styles.mascotContainer}>
-      <Image source={libuAvatar} style={styles.mascotImage} resizeMode="contain" />
+      <View style={styles.mascotImageWrapper}>
+        <Image source={libuAvatar} style={styles.mascotImage} resizeMode="contain" />
+      </View>
       <View style={styles.speechBubble}>
-        <ThemedText type="defaultSemiBold" style={{ color: Colors.primary }}>
+        <ThemedText type="defaultSemiBold" style={{ color: Colors.primary, textAlign: "center" }}>
           안녕! 나는 리버야
         </ThemedText>
-        <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: 4 }}>
+        <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: 4, textAlign: "center" }}>
           {activeContent
             ? "함께 미디어를 분석해볼까요?"
             : "미디어 콘텐츠를 추가하고 시작해요!"}
@@ -148,23 +150,35 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   mascotContainer: {
-    flexDirection: "row",
     alignItems: "center",
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.xl,
     paddingHorizontal: Spacing.sm,
   },
+  mascotImageWrapper: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: Colors.primaryLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.md,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+  },
   mascotImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   speechBubble: {
-    flex: 1,
-    marginLeft: Spacing.md,
     backgroundColor: Colors.primaryLight,
     borderRadius: 16,
-    borderTopLeftRadius: 4,
-    padding: Spacing.md,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    maxWidth: "90%",
   },
   moduleGrid: {
     flexDirection: "row",
