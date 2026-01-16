@@ -1,5 +1,7 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { HeaderButton } from "@react-navigation/elements";
+import { Feather } from "@expo/vector-icons";
 
 import MainTabNavigator from "@/navigation/MainTabNavigator";
 import ContentInputScreen from "@/screens/ContentInputScreen";
@@ -13,21 +15,20 @@ import LibraryDetailScreen from "@/screens/LibraryDetailScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { useContent } from "@/context/ContentContext";
 import { RootStackParamList } from "@/types/navigation";
+import { Colors } from "@/constants/theme";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
-  const { activeContent, isLoading } = useContent();
+  const { isLoading } = useContent();
 
   if (isLoading) {
     return null;
   }
 
-  const initialRouteName = activeContent ? "Main" : "ContentInput";
-
   return (
-    <Stack.Navigator screenOptions={screenOptions} initialRouteName={initialRouteName}>
+    <Stack.Navigator screenOptions={screenOptions} initialRouteName="Main">
       <Stack.Screen
         name="Main"
         component={MainTabNavigator}
@@ -36,10 +37,14 @@ export default function RootStackNavigator() {
       <Stack.Screen
         name="ContentInput"
         component={ContentInputScreen}
-        options={{
+        options={({ navigation }) => ({
           headerTitle: "콘텐츠 추가",
-          headerBackVisible: !!activeContent,
-        }}
+          headerLeft: () => (
+            <HeaderButton onPress={() => navigation.navigate("Main")}>
+              <Feather name="home" size={22} color={Colors.primary} />
+            </HeaderButton>
+          ),
+        })}
       />
       <Stack.Screen
         name="ModuleVocabulary"
