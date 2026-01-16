@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, View, StyleSheet, Image, Pressable } from "react-native";
+import { View, StyleSheet, Image, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -8,61 +8,27 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
-import { ModuleCard } from "@/components/ModuleCard";
 import { ContentBanner } from "@/components/ContentBanner";
 import { EmptyState } from "@/components/EmptyState";
-import { ModuleCardSkeleton } from "@/components/LoadingSkeleton";
-import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
 import { useContent } from "@/context/ContentContext";
-import { Spacing, Colors } from "@/constants/theme";
+import { Spacing, Colors, BorderRadius } from "@/constants/theme";
 import { RootStackParamList } from "@/types/navigation";
 
 const libuAvatar = require("../../assets/images/illustrations/libu-avatar.png");
 
-const MODULES = [
-  {
-    id: "vocabulary",
-    icon: "book" as const,
-    title: "어휘 지원",
-    description: "어려운 단어의 뜻과 쉬운 문장 번역을 제공합니다",
-    screen: "ModuleVocabulary" as const,
-  },
-  {
-    id: "summary",
-    icon: "file-text" as const,
-    title: "사실·요약적 이해",
-    description: "콘텐츠를 요약하고 핵심 사실을 확인합니다",
-    screen: "ModuleSummary" as const,
-  },
-  {
-    id: "inference",
-    icon: "zap" as const,
-    title: "추론적 이해",
-    description: "배경지식을 탐색하고 추론을 연습합니다",
-    screen: "ModuleInference" as const,
-  },
-  {
-    id: "critical",
-    icon: "search" as const,
-    title: "비판적 이해",
-    description: "다양한 관점에서 토론하고 논박합니다",
-    screen: "ModuleCritical" as const,
-  },
-  {
-    id: "integration",
-    icon: "git-branch" as const,
-    title: "통합적 이해",
-    description: "마인드맵으로 개념을 연결하고 정리합니다",
-    screen: "ModuleIntegration" as const,
-  },
-  {
-    id: "verification",
-    icon: "shield" as const,
-    title: "정보 안전성 검증",
-    description: "정보의 신뢰도와 출처를 평가합니다",
-    screen: "ModuleVerification" as const,
-  },
+const MODULES: {
+  id: string;
+  icon: keyof typeof Feather.glyphMap;
+  title: string;
+  screen: keyof RootStackParamList;
+}[] = [
+  { id: "vocabulary", icon: "book", title: "어휘", screen: "ModuleVocabulary" },
+  { id: "summary", icon: "file-text", title: "요약", screen: "ModuleSummary" },
+  { id: "inference", icon: "zap", title: "추론", screen: "ModuleInference" },
+  { id: "critical", icon: "search", title: "비판", screen: "ModuleCritical" },
+  { id: "integration", icon: "git-branch", title: "통합", screen: "ModuleIntegration" },
+  { id: "verification", icon: "shield", title: "검증", screen: "ModuleVerification" },
 ];
 
 export default function LearnScreen() {
@@ -70,16 +36,8 @@ export default function LearnScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
-  const { activeContent, isLoading, records } = useContent();
+  const { activeContent, isLoading } = useContent();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const getModuleProgress = (moduleId: string) => {
-    if (!activeContent) return 0;
-    const moduleRecords = records.filter(
-      (r) => r.tabName === moduleId && r.contentTitle === activeContent.title
-    );
-    return moduleRecords.length > 0 ? 100 : 0;
-  };
 
   const handleAddContent = () => {
     navigation.navigate("ContentInput");
@@ -105,23 +63,30 @@ export default function LearnScreen() {
     </View>
   );
 
+  const renderModuleIcon = (item: typeof MODULES[0]) => (
+    <Pressable
+      key={item.id}
+      style={[styles.moduleIconContainer, { backgroundColor: theme.backgroundDefault }]}
+      onPress={() => handleModulePress(item.screen)}
+      testID={`module-${item.id}`}
+    >
+      <View style={[styles.iconCircle, { backgroundColor: Colors.primaryLight }]}>
+        <Feather name={item.icon} size={24} color={Colors.primary} />
+      </View>
+      <ThemedText type="small" style={[styles.iconLabel, { color: theme.text }]}>
+        {item.title}
+      </ThemedText>
+    </Pressable>
+  );
+
   if (isLoading) {
     return (
       <View
         style={[
           styles.container,
-          {
-            backgroundColor: theme.backgroundRoot,
-            paddingTop: headerHeight + Spacing.xl,
-          },
+          { backgroundColor: theme.backgroundRoot, paddingTop: headerHeight + Spacing.xl },
         ]}
-      >
-        {[1, 2, 3, 4].map((i) => (
-          <View key={i} style={{ paddingHorizontal: Spacing.lg }}>
-            <ModuleCardSkeleton />
-          </View>
-        ))}
-      </View>
+      />
     );
   }
 
@@ -150,7 +115,7 @@ export default function LearnScreen() {
   }
 
   return (
-    <FlatList
+    <ScrollView
       style={{ flex: 1, backgroundColor: theme.backgroundRoot }}
       contentContainerStyle={{
         paddingTop: headerHeight + Spacing.md,
@@ -158,30 +123,19 @@ export default function LearnScreen() {
         paddingHorizontal: Spacing.lg,
       }}
       scrollIndicatorInsets={{ bottom: insets.bottom }}
-      data={MODULES}
-      keyExtractor={(item) => item.id}
-      ListHeaderComponent={
-        <>
-          <MascotHeader />
-          <ContentBanner content={activeContent} onPress={handleAddContent} />
-          <ThemedText
-            type="small"
-            style={[styles.sectionTitle, { color: theme.textSecondary }]}
-          >
-            학습 모듈
-          </ThemedText>
-        </>
-      }
-      renderItem={({ item }) => (
-        <ModuleCard
-          icon={item.icon}
-          title={item.title}
-          description={item.description}
-          progress={getModuleProgress(item.id)}
-          onPress={() => handleModulePress(item.screen)}
-        />
-      )}
-    />
+    >
+      <MascotHeader />
+      <ContentBanner content={activeContent} onPress={handleAddContent} />
+      <ThemedText
+        type="small"
+        style={[styles.sectionTitle, { color: theme.textSecondary }]}
+      >
+        학습 모듈
+      </ThemedText>
+      <View style={styles.moduleGrid}>
+        {MODULES.map(renderModuleIcon)}
+      </View>
+    </ScrollView>
   );
 }
 
@@ -211,5 +165,29 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderTopLeftRadius: 4,
     padding: Spacing.md,
+  },
+  moduleGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: Spacing.md,
+  },
+  moduleIconContainer: {
+    width: "30%",
+    alignItems: "center",
+    paddingVertical: Spacing.lg,
+    borderRadius: BorderRadius.md,
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: Spacing.sm,
+  },
+  iconLabel: {
+    fontWeight: "500",
+    textAlign: "center",
   },
 });
