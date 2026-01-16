@@ -13,7 +13,7 @@ import { Card } from "@/components/Card";
 import { EmptyState } from "@/components/EmptyState";
 import { useTheme } from "@/hooks/useTheme";
 import { getLibrary, removeFromLibrary, LibraryItem } from "@/lib/storage";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { Spacing, BorderRadius, Colors } from "@/constants/theme";
 import { RootStackParamList } from "@/types/navigation";
 
 const CONTENT_TYPE_LABELS: Record<string, string> = {
@@ -33,6 +33,8 @@ export default function LibraryScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [library, setLibrary] = useState<LibraryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const loadLibrary = async () => {
     setIsLoading(true);
@@ -45,18 +47,42 @@ export default function LibraryScreen() {
     loadLibrary();
   }, []);
 
-  const handleDelete = (item: LibraryItem) => {
+  const toggleEditMode = () => {
+    if (isEditMode) {
+      setSelectedIds(new Set());
+    }
+    setIsEditMode(!isEditMode);
+  };
+
+  const toggleSelection = (id: string) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+    Haptics.selectionAsync();
+  };
+
+  const handleDeleteSelected = () => {
+    if (selectedIds.size === 0) return;
+
     Alert.alert(
       "삭제",
-      `"${item.content.title}"을(를) 삭제하시겠어요?`,
+      `선택한 ${selectedIds.size}개 항목을 삭제하시겠어요?`,
       [
         { text: "취소", style: "cancel" },
         {
           text: "삭제",
           style: "destructive",
           onPress: async () => {
-            await removeFromLibrary(item.id);
+            for (const id of selectedIds) {
+              await removeFromLibrary(id);
+            }
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            setSelectedIds(new Set());
+            setIsEditMode(false);
             loadLibrary();
           },
         },
@@ -95,68 +121,135 @@ export default function LibraryScreen() {
   }
 
   return (
-    <FlatList
-      style={{ flex: 1, backgroundColor: theme.backgroundRoot }}
-      contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.xl,
-        paddingBottom: tabBarHeight + Spacing.xl,
-        paddingHorizontal: Spacing.lg,
-      }}
-      scrollIndicatorInsets={{ bottom: insets.bottom }}
-      data={library}
-      keyExtractor={(item) => item.id}
-      ListHeaderComponent={
-        <ThemedText type="h4" style={styles.title}>
-          자료실
-        </ThemedText>
-      }
-      renderItem={({ item }) => (
-        <Pressable onPress={() => navigation.navigate("LibraryDetail", { item })}>
-          <Card elevation={1} style={styles.card}>
-            <View style={styles.cardHeader}>
-              <View
-                style={[
-                  styles.typeBadge,
-                  { backgroundColor: theme.link + "15" },
-                ]}
+    <View style={{ flex: 1, backgroundColor: theme.backgroundRoot }}>
+      <FlatList
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.xl,
+          paddingBottom: tabBarHeight + Spacing.xl + (isEditMode ? 70 : 0),
+          paddingHorizontal: Spacing.lg,
+        }}
+        scrollIndicatorInsets={{ bottom: insets.bottom }}
+        data={library}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={
+          <View style={styles.headerRow}>
+            <ThemedText type="h4">자료실</ThemedText>
+            <Pressable onPress={toggleEditMode} hitSlop={8}>
+              <ThemedText
+                type="defaultSemiBold"
+                style={{ color: Colors.primary }}
               >
-                <ThemedText type="caption" style={{ color: theme.link }}>
-                  {CONTENT_TYPE_LABELS[item.content.type] || item.content.type}
+                {isEditMode ? "완료" : "편집"}
+              </ThemedText>
+            </Pressable>
+          </View>
+        }
+        renderItem={({ item }) => (
+          <Pressable
+            onPress={() => {
+              if (isEditMode) {
+                toggleSelection(item.id);
+              } else {
+                navigation.navigate("LibraryDetail", { item });
+              }
+            }}
+          >
+            <Card elevation={1} style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View
+                  style={[
+                    styles.typeBadge,
+                    { backgroundColor: theme.link + "15" },
+                  ]}
+                >
+                  <ThemedText type="caption" style={{ color: theme.link }}>
+                    {CONTENT_TYPE_LABELS[item.content.type] || item.content.type}
+                  </ThemedText>
+                </View>
+                {isEditMode ? (
+                  <View
+                    style={[
+                      styles.checkbox,
+                      {
+                        backgroundColor: selectedIds.has(item.id)
+                          ? Colors.primary
+                          : "transparent",
+                        borderColor: selectedIds.has(item.id)
+                          ? Colors.primary
+                          : theme.textTertiary,
+                      },
+                    ]}
+                  >
+                    {selectedIds.has(item.id) ? (
+                      <Feather name="check" size={14} color="#fff" />
+                    ) : null}
+                  </View>
+                ) : null}
+              </View>
+              <ThemedText type="subheading" style={styles.cardTitle}>
+                {item.content.title}
+              </ThemedText>
+              <ThemedText
+                type="small"
+                numberOfLines={2}
+                style={[styles.preview, { color: theme.textSecondary }]}
+              >
+                {item.content.text.substring(0, 100)}...
+              </ThemedText>
+              <View style={styles.cardFooter}>
+                <ThemedText type="caption" style={{ color: theme.textTertiary }}>
+                  {formatDate(item.savedAt)}
+                </ThemedText>
+                <ThemedText type="caption" style={{ color: theme.textTertiary }}>
+                  {item.records.length}개 활동
                 </ThemedText>
               </View>
-              <Pressable
-                onPress={(e) => {
-                  e.stopPropagation();
-                  handleDelete(item);
-                }}
-                hitSlop={8}
-                style={[styles.deleteButton, { backgroundColor: theme.error + "15" }]}
-              >
-                <Feather name="trash-2" size={18} color={theme.error} />
-              </Pressable>
-            </View>
-            <ThemedText type="subheading" style={styles.cardTitle}>
-              {item.content.title}
-            </ThemedText>
+            </Card>
+          </Pressable>
+        )}
+      />
+
+      {isEditMode ? (
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              backgroundColor: theme.backgroundDefault,
+              paddingBottom: insets.bottom + Spacing.md,
+              borderTopColor: theme.border,
+            },
+          ]}
+        >
+          <Pressable
+            onPress={handleDeleteSelected}
+            disabled={selectedIds.size === 0}
+            style={[
+              styles.deleteButton,
+              {
+                backgroundColor:
+                  selectedIds.size > 0 ? theme.error : theme.backgroundSecondary,
+              },
+            ]}
+          >
+            <Feather
+              name="trash-2"
+              size={18}
+              color={selectedIds.size > 0 ? "#fff" : theme.textTertiary}
+            />
             <ThemedText
-              type="small"
-              numberOfLines={2}
-              style={[styles.preview, { color: theme.textSecondary }]}
+              type="defaultSemiBold"
+              style={{
+                color: selectedIds.size > 0 ? "#fff" : theme.textTertiary,
+                marginLeft: Spacing.sm,
+              }}
             >
-              {item.content.text.substring(0, 100)}...
+              삭제 ({selectedIds.size})
             </ThemedText>
-            <View style={styles.cardFooter}>
-              <ThemedText type="caption" style={{ color: theme.textTertiary }}>
-                {formatDate(item.savedAt)}
-              </ThemedText>
-              <ThemedText type="caption" style={{ color: theme.textTertiary }}>
-                {item.records.length}개 활동
-              </ThemedText>
-            </View>
-          </Card>
-        </Pressable>
-      )}
-    />
+          </Pressable>
+        </View>
+      ) : null}
+    </View>
   );
 }
 
@@ -164,7 +257,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  title: {
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: Spacing.xl,
   },
   card: {
@@ -181,9 +277,13 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.xs,
     borderRadius: BorderRadius.xs,
   },
-  deleteButton: {
-    padding: Spacing.sm,
-    borderRadius: BorderRadius.sm,
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
   },
   cardTitle: {
     marginBottom: Spacing.sm,
@@ -194,5 +294,21 @@ const styles = StyleSheet.create({
   cardFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
+  },
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingTop: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderTopWidth: 1,
+  },
+  deleteButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
   },
 });
