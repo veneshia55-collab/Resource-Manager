@@ -167,23 +167,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 학생의 주장: "${claim}"
 
-1. 찬성과 반대 논거를 각각 제시하세요
-2. AI가 반박과 재반박 토론을 시뮬레이션하세요
-3. 다양한 관점에서 이 주제를 바라보게 해주세요
+1. 학생의 주장에 대한 찬성 논거를 제시하세요
+2. 학생의 주장에 대한 반대 논거를 제시하세요
+3. **중요** 반박(rebuttal)은 반드시 학생의 주장과 정반대되는 논리적인 주장을 구체적인 근거와 함께 제시하세요
+4. 재반박(counter-rebuttal)은 반박에 대해 학생의 원래 주장을 방어하는 내용을 제시하세요
+5. 다양한 관점에서 이 주제를 바라보게 해주세요
 
 다음 JSON 형식으로 응답하세요:
 {
   "proArguments": [
-    {"point": "찬성 논거1", "source": 1},
-    {"point": "찬성 논거2", "source": 2}
+    {"point": "찬성 논거1", "evidence": "구체적인 근거나 사례"},
+    {"point": "찬성 논거2", "evidence": "구체적인 근거나 사례"}
   ],
   "conArguments": [
-    {"point": "반대 논거1", "source": 1},
-    {"point": "반대 논거2", "source": 2}
+    {"point": "반대 논거1", "evidence": "구체적인 근거나 사례"},
+    {"point": "반대 논거2", "evidence": "구체적인 근거나 사례"}
   ],
   "debate": [
-    {"role": "rebuttal", "message": "반박 메시지"},
-    {"role": "counter-rebuttal", "message": "재반박 메시지"}
+    {"role": "rebuttal", "message": "학생 주장과 반대되는 논리적 주장 (구체적 근거 포함)", "evidence": "반박을 뒷받침하는 구체적인 사실, 통계, 또는 사례"},
+    {"role": "counter-rebuttal", "message": "반박에 대한 재반박 (학생 입장 방어)", "evidence": "재반박을 뒷받침하는 구체적인 사실, 통계, 또는 사례"}
   ],
   "perspectives": {
     "pro": "찬성 입장에서 본 관점 요약",
