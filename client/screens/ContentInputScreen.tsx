@@ -173,11 +173,12 @@ export default function ContentInputScreen() {
       </Button>
 
       <Button
-        onPress={() => {
+        onPress={async () => {
           setTitle("");
           setTypeIndex(0);
           setText("");
           setUrl("");
+          await setActiveContent(null);
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }}
         variant="secondary"
