@@ -155,7 +155,16 @@ export default function LibraryScreen() {
               }
             }}
           >
-            <Card elevation={1} style={styles.card}>
+            <Card
+              elevation={1}
+              style={[
+                styles.card,
+                isEditMode && selectedIds.has(item.id) && {
+                  borderWidth: 2,
+                  borderColor: theme.error,
+                },
+              ]}
+            >
               <View style={styles.cardHeader}>
                 <View
                   style={[
@@ -173,17 +182,19 @@ export default function LibraryScreen() {
                       styles.checkbox,
                       {
                         backgroundColor: selectedIds.has(item.id)
-                          ? Colors.primary
+                          ? theme.error
                           : "transparent",
                         borderColor: selectedIds.has(item.id)
-                          ? Colors.primary
+                          ? theme.error
                           : theme.textTertiary,
                       },
                     ]}
                   >
                     {selectedIds.has(item.id) ? (
-                      <Feather name="check" size={14} color="#fff" />
-                    ) : null}
+                      <Feather name="trash-2" size={12} color="#fff" />
+                    ) : (
+                      <Feather name="circle" size={12} color={theme.textTertiary} />
+                    )}
                   </View>
                 ) : null}
               </View>
