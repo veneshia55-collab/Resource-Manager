@@ -131,7 +131,7 @@ export default function ReportScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
-  const { records, clearRecords } = useContent();
+  const { records, clearRecords, activeContent } = useContent();
 
   const scores = useMemo(() => {
     const scoresByModule: Record<string, number[]> = {};
@@ -180,6 +180,27 @@ export default function ReportScreen() {
       ]
     );
   };
+
+  if (!activeContent) {
+    return (
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: theme.backgroundRoot,
+            paddingTop: headerHeight,
+            paddingBottom: tabBarHeight,
+          },
+        ]}
+      >
+        <EmptyState
+          image={require("../../assets/images/illustrations/empty-content.png")}
+          title="콘텐츠를 먼저 입력해주세요"
+          description="학습할 콘텐츠가 있어야 리포트를 확인할 수 있어요"
+        />
+      </View>
+    );
+  }
 
   if (records.length === 0) {
     return (
