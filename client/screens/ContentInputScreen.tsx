@@ -171,6 +171,20 @@ export default function ContentInputScreen() {
       <Button onPress={handleSave} style={styles.button}>
         학습 시작하기
       </Button>
+
+      <Button
+        onPress={() => {
+          setTitle("");
+          setTypeIndex(0);
+          setText("");
+          setUrl("");
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }}
+        variant="secondary"
+        style={styles.resetButton}
+      >
+        콘텐츠 리셋
+      </Button>
     </KeyboardAwareScrollViewCompat>
   );
 }
@@ -206,6 +220,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
   },
   button: {
+    marginTop: Spacing.md,
+  },
+  resetButton: {
     marginTop: Spacing.md,
   },
 });
