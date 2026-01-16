@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -11,9 +11,12 @@ import { queryClient } from "@/lib/query-client";
 
 import RootStackNavigator from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SplashScreen } from "@/components/SplashScreen";
 import { ContentProvider } from "@/context/ContentContext";
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
@@ -24,6 +27,9 @@ export default function App() {
                 <NavigationContainer>
                   <RootStackNavigator />
                 </NavigationContainer>
+                {showSplash ? (
+                  <SplashScreen onFinish={() => setShowSplash(false)} />
+                ) : null}
               </ContentProvider>
               <StatusBar style="auto" />
             </KeyboardProvider>
