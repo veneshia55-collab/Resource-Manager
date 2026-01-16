@@ -9,6 +9,7 @@ import ModuleInferenceScreen from "@/screens/ModuleInferenceScreen";
 import ModuleCriticalScreen from "@/screens/ModuleCriticalScreen";
 import ModuleIntegrationScreen from "@/screens/ModuleIntegrationScreen";
 import ModuleVerificationScreen from "@/screens/ModuleVerificationScreen";
+import LibraryDetailScreen from "@/screens/LibraryDetailScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { useContent } from "@/context/ContentContext";
 import { RootStackParamList } from "@/types/navigation";
@@ -80,6 +81,13 @@ export default function RootStackNavigator() {
         component={ModuleVerificationScreen}
         options={{
           headerTitle: "정보 안전성 검증",
+        }}
+      />
+      <Stack.Screen
+        name="LibraryDetail"
+        component={LibraryDetailScreen}
+        options={{
+          headerTitle: "학습 리포트",
         }}
       />
     </Stack.Navigator>

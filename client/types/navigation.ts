@@ -1,3 +1,5 @@
+import { LibraryItem } from "@/lib/storage";
+
 export type RootStackParamList = {
   Main: undefined;
   ContentInput: undefined;
@@ -7,6 +9,7 @@ export type RootStackParamList = {
   ModuleCritical: undefined;
   ModuleIntegration: undefined;
   ModuleVerification: undefined;
+  LibraryDetail: { item: LibraryItem };
 };
 
 export type MainTabParamList = {

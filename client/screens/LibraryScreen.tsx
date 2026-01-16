@@ -3,6 +3,8 @@ import { View, StyleSheet, FlatList, Alert, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 
@@ -12,6 +14,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { useTheme } from "@/hooks/useTheme";
 import { getLibrary, removeFromLibrary, LibraryItem } from "@/lib/storage";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { RootStackParamList } from "@/types/navigation";
 
 const CONTENT_TYPE_LABELS: Record<string, string> = {
   news: "뉴스",
@@ -27,6 +30,7 @@ export default function LibraryScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [library, setLibrary] = useState<LibraryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -107,45 +111,50 @@ export default function LibraryScreen() {
         </ThemedText>
       }
       renderItem={({ item }) => (
-        <Card elevation={1} style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View
-              style={[
-                styles.typeBadge,
-                { backgroundColor: theme.link + "15" },
-              ]}
+        <Pressable onPress={() => navigation.navigate("LibraryDetail", { item })}>
+          <Card elevation={1} style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View
+                style={[
+                  styles.typeBadge,
+                  { backgroundColor: theme.link + "15" },
+                ]}
+              >
+                <ThemedText type="caption" style={{ color: theme.link }}>
+                  {CONTENT_TYPE_LABELS[item.content.type] || item.content.type}
+                </ThemedText>
+              </View>
+              <Pressable
+                onPress={(e) => {
+                  e.stopPropagation();
+                  handleDelete(item);
+                }}
+                hitSlop={8}
+                style={[styles.deleteButton, { backgroundColor: theme.error + "15" }]}
+              >
+                <Feather name="trash-2" size={18} color={theme.error} />
+              </Pressable>
+            </View>
+            <ThemedText type="subheading" style={styles.cardTitle}>
+              {item.content.title}
+            </ThemedText>
+            <ThemedText
+              type="small"
+              numberOfLines={2}
+              style={[styles.preview, { color: theme.textSecondary }]}
             >
-              <ThemedText type="caption" style={{ color: theme.link }}>
-                {CONTENT_TYPE_LABELS[item.content.type] || item.content.type}
+              {item.content.text.substring(0, 100)}...
+            </ThemedText>
+            <View style={styles.cardFooter}>
+              <ThemedText type="caption" style={{ color: theme.textTertiary }}>
+                {formatDate(item.savedAt)}
+              </ThemedText>
+              <ThemedText type="caption" style={{ color: theme.textTertiary }}>
+                {item.records.length}개 활동
               </ThemedText>
             </View>
-            <Pressable
-              onPress={() => handleDelete(item)}
-              hitSlop={8}
-              style={[styles.deleteButton, { backgroundColor: theme.error + "15" }]}
-            >
-              <Feather name="trash-2" size={18} color={theme.error} />
-            </Pressable>
-          </View>
-          <ThemedText type="subheading" style={styles.cardTitle}>
-            {item.content.title}
-          </ThemedText>
-          <ThemedText
-            type="small"
-            numberOfLines={2}
-            style={[styles.preview, { color: theme.textSecondary }]}
-          >
-            {item.content.text.substring(0, 100)}...
-          </ThemedText>
-          <View style={styles.cardFooter}>
-            <ThemedText type="caption" style={{ color: theme.textTertiary }}>
-              {formatDate(item.savedAt)}
-            </ThemedText>
-            <ThemedText type="caption" style={{ color: theme.textTertiary }}>
-              {item.records.length}개 활동
-            </ThemedText>
-          </View>
-        </Card>
+          </Card>
+        </Pressable>
       )}
     />
   );

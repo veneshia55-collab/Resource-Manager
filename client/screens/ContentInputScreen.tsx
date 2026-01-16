@@ -12,7 +12,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
 import { useContent } from "@/context/ContentContext";
-import { generateId, addToLibrary } from "@/lib/storage";
+import { generateId, addToLibrary, clearRecords } from "@/lib/storage";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { RootStackParamList } from "@/types/navigation";
 
@@ -174,10 +174,24 @@ export default function ContentInputScreen() {
 
       <Button
         onPress={async () => {
+          if (activeContent && records.length > 0) {
+            const contentRecords = records.filter(
+              (r) => r.contentTitle === activeContent.title
+            );
+            if (contentRecords.length > 0) {
+              await addToLibrary({
+                id: generateId(),
+                content: activeContent,
+                savedAt: new Date().toISOString(),
+                records: contentRecords,
+              });
+            }
+          }
           setTitle("");
           setTypeIndex(0);
           setText("");
           setUrl("");
+          await clearRecords();
           await setActiveContent(null);
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         }}
