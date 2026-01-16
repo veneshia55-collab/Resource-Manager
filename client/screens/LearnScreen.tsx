@@ -1,20 +1,24 @@
 import React from "react";
-import { FlatList, View, StyleSheet } from "react-native";
+import { FlatList, View, StyleSheet, Image, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ModuleCard } from "@/components/ModuleCard";
 import { ContentBanner } from "@/components/ContentBanner";
 import { EmptyState } from "@/components/EmptyState";
 import { ModuleCardSkeleton } from "@/components/LoadingSkeleton";
+import { Card } from "@/components/Card";
 import { useTheme } from "@/hooks/useTheme";
 import { useContent } from "@/context/ContentContext";
-import { Spacing } from "@/constants/theme";
+import { Spacing, Colors } from "@/constants/theme";
 import { RootStackParamList } from "@/types/navigation";
+
+const libuAvatar = require("../../assets/images/illustrations/libu-avatar.png");
 
 const MODULES = [
   {
@@ -85,6 +89,22 @@ export default function LearnScreen() {
     navigation.navigate(screen);
   };
 
+  const MascotHeader = () => (
+    <View style={styles.mascotContainer}>
+      <Image source={libuAvatar} style={styles.mascotImage} resizeMode="contain" />
+      <View style={styles.speechBubble}>
+        <ThemedText type="defaultSemiBold" style={{ color: Colors.primary }}>
+          안녕! 나는 리버야
+        </ThemedText>
+        <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: 4 }}>
+          {activeContent
+            ? "함께 미디어를 분석해볼까요?"
+            : "미디어 콘텐츠를 추가하고 시작해요!"}
+        </ThemedText>
+      </View>
+    </View>
+  );
+
   if (isLoading) {
     return (
       <View
@@ -117,6 +137,7 @@ export default function LearnScreen() {
           },
         ]}
       >
+        <MascotHeader />
         <EmptyState
           image={require("../../assets/images/illustrations/empty-content.png")}
           title="학습할 콘텐츠가 없어요"
@@ -132,7 +153,7 @@ export default function LearnScreen() {
     <FlatList
       style={{ flex: 1, backgroundColor: theme.backgroundRoot }}
       contentContainerStyle={{
-        paddingTop: headerHeight + Spacing.xl,
+        paddingTop: headerHeight + Spacing.md,
         paddingBottom: tabBarHeight + Spacing.xl,
         paddingHorizontal: Spacing.lg,
       }}
@@ -141,6 +162,7 @@ export default function LearnScreen() {
       keyExtractor={(item) => item.id}
       ListHeaderComponent={
         <>
+          <MascotHeader />
           <ContentBanner content={activeContent} onPress={handleAddContent} />
           <ThemedText
             type="small"
@@ -170,5 +192,24 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: Spacing.md,
     fontWeight: "600",
+  },
+  mascotContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+    paddingHorizontal: Spacing.sm,
+  },
+  mascotImage: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+  },
+  speechBubble: {
+    flex: 1,
+    marginLeft: Spacing.md,
+    backgroundColor: Colors.primaryLight,
+    borderRadius: 16,
+    borderTopLeftRadius: 4,
+    padding: Spacing.md,
   },
 });
