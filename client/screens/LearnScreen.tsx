@@ -9,7 +9,6 @@ import { Feather } from "@expo/vector-icons";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ContentBanner } from "@/components/ContentBanner";
-import { EmptyState } from "@/components/EmptyState";
 import { useTheme } from "@/hooks/useTheme";
 import { useContent } from "@/context/ContentContext";
 import { Spacing, Colors, BorderRadius } from "@/constants/theme";
@@ -97,6 +96,7 @@ export default function LearnScreen() {
       <View
         style={[
           styles.container,
+          styles.emptyContainer,
           {
             backgroundColor: theme.backgroundRoot,
             paddingTop: headerHeight,
@@ -104,14 +104,17 @@ export default function LearnScreen() {
           },
         ]}
       >
-        <MascotHeader />
-        <EmptyState
-          image={require("../../assets/images/illustrations/empty-content.png")}
-          title="학습할 콘텐츠가 없어요"
-          description="미디어 콘텐츠를 추가하면 리버와 함께 미디어 리터러시를 학습할 수 있어요"
-          actionLabel="콘텐츠 추가하기"
-          onAction={handleAddContent}
-        />
+        <Pressable
+          style={[styles.addContentButton, { backgroundColor: Colors.primaryLight }]}
+          onPress={handleAddContent}
+        >
+          <View style={[styles.addIconCircle, { backgroundColor: Colors.primary }]}>
+            <Feather name="plus" size={32} color="#FFFFFF" />
+          </View>
+          <ThemedText type="defaultSemiBold" style={{ color: Colors.primary, marginTop: Spacing.md }}>
+            콘텐츠 추가하기
+          </ThemedText>
+        </Pressable>
       </View>
     );
   }
@@ -144,6 +147,24 @@ export default function LearnScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  emptyContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addContentButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing["2xl"],
+    paddingHorizontal: Spacing["3xl"],
+    borderRadius: BorderRadius.lg,
+  },
+  addIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    alignItems: "center",
+    justifyContent: "center",
   },
   sectionTitle: {
     marginBottom: Spacing.md,
