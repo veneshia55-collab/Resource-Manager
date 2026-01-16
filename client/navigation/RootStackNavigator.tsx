@@ -10,15 +10,23 @@ import ModuleCriticalScreen from "@/screens/ModuleCriticalScreen";
 import ModuleIntegrationScreen from "@/screens/ModuleIntegrationScreen";
 import ModuleVerificationScreen from "@/screens/ModuleVerificationScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
+import { useContent } from "@/context/ContentContext";
 import { RootStackParamList } from "@/types/navigation";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootStackNavigator() {
   const screenOptions = useScreenOptions();
+  const { activeContent, isLoading } = useContent();
+
+  if (isLoading) {
+    return null;
+  }
+
+  const initialRouteName = activeContent ? "Main" : "ContentInput";
 
   return (
-    <Stack.Navigator screenOptions={screenOptions}>
+    <Stack.Navigator screenOptions={screenOptions} initialRouteName={initialRouteName}>
       <Stack.Screen
         name="Main"
         component={MainTabNavigator}
@@ -28,8 +36,8 @@ export default function RootStackNavigator() {
         name="ContentInput"
         component={ContentInputScreen}
         options={{
-          presentation: "modal",
           headerTitle: "콘텐츠 추가",
+          headerBackVisible: !!activeContent,
         }}
       />
       <Stack.Screen

@@ -33,6 +33,8 @@ export default function ContentInputScreen() {
   const [text, setText] = useState(activeContent?.text || "");
   const [url, setUrl] = useState(activeContent?.url || "");
 
+  const isFirstContent = !activeContent;
+
   const handleSave = async () => {
     if (!title.trim()) {
       Alert.alert("알림", "콘텐츠 제목을 입력해주세요.");
@@ -68,7 +70,15 @@ export default function ContentInputScreen() {
 
     await setActiveContent(newContent);
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    navigation.goBack();
+
+    if (isFirstContent) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Main" }],
+      });
+    } else {
+      navigation.goBack();
+    }
   };
 
   return (
