@@ -10,7 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { Colors } from "@/constants/theme";
 
-const libuAvatar = require("../../assets/images/illustrations/libu-avatar.png");
+const libuMascot = require("../../assets/images/libu-mascot.png");
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -53,7 +53,7 @@ export function SplashScreen({ onFinish }: SplashScreenProps) {
         end={{ x: 1, y: 1 }}
       >
         <Animated.View style={[styles.imageContainer, imageStyle]}>
-          <Image source={libuAvatar} style={styles.mascotImage} resizeMode="contain" />
+          <Image source={libuMascot} style={styles.mascotImage} resizeMode="contain" />
         </Animated.View>
       </LinearGradient>
     </Animated.View>

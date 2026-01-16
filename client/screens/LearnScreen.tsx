@@ -14,7 +14,7 @@ import { useContent } from "@/context/ContentContext";
 import { Spacing, Colors, BorderRadius } from "@/constants/theme";
 import { RootStackParamList } from "@/types/navigation";
 
-const libuAvatar = require("../../assets/images/illustrations/libu-avatar.png");
+const libuMascot = require("../../assets/images/libu-mascot.png");
 
 const MODULES: {
   id: string;
@@ -49,7 +49,7 @@ export default function LearnScreen() {
   const MascotHeader = () => (
     <View style={styles.mascotContainer}>
       <View style={styles.mascotImageWrapper}>
-        <Image source={libuAvatar} style={styles.mascotImage} resizeMode="contain" />
+        <Image source={libuMascot} style={styles.mascotImage} resizeMode="contain" />
       </View>
       <View style={styles.speechBubble}>
         <ThemedText type="defaultSemiBold" style={{ color: Colors.primary, textAlign: "center" }}>
