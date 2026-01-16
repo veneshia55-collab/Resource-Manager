@@ -91,34 +91,6 @@ export default function LearnScreen() {
     );
   }
 
-  if (!activeContent) {
-    return (
-      <View
-        style={[
-          styles.container,
-          styles.emptyContainer,
-          {
-            backgroundColor: theme.backgroundRoot,
-            paddingTop: headerHeight,
-            paddingBottom: tabBarHeight,
-          },
-        ]}
-      >
-        <Pressable style={styles.emptyBubbleContainer} onPress={handleAddContent}>
-          <View style={styles.emptyBubble}>
-            <ThemedText type="defaultSemiBold" style={{ color: Colors.primary }}>
-              콘텐츠 추가하기
-            </ThemedText>
-            <ThemedText type="small" style={{ color: theme.textSecondary, marginTop: 4 }}>
-              미디어 콘텐츠를 추가해서 학습을 시작하세요
-            </ThemedText>
-          </View>
-          <View style={styles.bubbleTail} />
-        </Pressable>
-      </View>
-    );
-  }
-
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.backgroundRoot }}
@@ -130,7 +102,24 @@ export default function LearnScreen() {
       scrollIndicatorInsets={{ bottom: insets.bottom }}
     >
       <MascotHeader />
-      <ContentBanner content={activeContent} onPress={handleAddContent} />
+      {activeContent ? (
+        <ContentBanner content={activeContent} onPress={handleAddContent} />
+      ) : (
+        <Pressable
+          style={[styles.addContentBanner, { backgroundColor: Colors.primaryLight }]}
+          onPress={handleAddContent}
+        >
+          <Feather name="plus-circle" size={24} color={Colors.primary} />
+          <View style={styles.addContentText}>
+            <ThemedText type="defaultSemiBold" style={{ color: Colors.primary }}>
+              콘텐츠 추가하기
+            </ThemedText>
+            <ThemedText type="small" style={{ color: theme.textSecondary }}>
+              미디어 콘텐츠를 추가해서 학습을 시작하세요
+            </ThemedText>
+          </View>
+        </Pressable>
+      )}
       <ThemedText
         type="small"
         style={[styles.sectionTitle, { color: theme.textSecondary }]}
@@ -173,6 +162,17 @@ const styles = StyleSheet.create({
     borderRightColor: "transparent",
     borderTopColor: Colors.primaryLight,
     marginTop: -1,
+  },
+  addContentBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.xl,
+  },
+  addContentText: {
+    marginLeft: Spacing.md,
+    flex: 1,
   },
   sectionTitle: {
     marginBottom: Spacing.md,
